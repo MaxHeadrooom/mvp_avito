@@ -1,0 +1,27 @@
+@startuml
+title CJM заведения — обработка заказа
+
+start
+:Синхронизирует заведение и меню\nпо partner_id / external_id;
+:Core присылает webhook\nс order_id;
+
+if (Webhook уже был обработан?) then (да)
+  :Возвращает 200 duplicate;
+  stop
+else (нет)
+  :Показывает заказ оператору;
+endif
+
+if (Может выполнить заказ?) then (нет)
+  :Отправляет decision\naccept=false и причину;
+  :Core переводит заказ в rejected\nи возвращает резерв;
+  stop
+else (да)
+  :Отправляет decision accept=true;
+  :Готовит заказ;
+  :Передаёт preparing, затем ready;
+  :Завершает completed;
+endif
+stop
+@enduml
+

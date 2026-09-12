@@ -1,0 +1,60 @@
+openapi: 3.1.0
+info:
+  title: Mario Establishment Service API
+  version: 0.2.0
+  description: Reference API of the connected establishment used for the demo.
+servers:
+  - url: http://localhost:8001
+paths:
+  /health:
+    get:
+      responses: {'200': {description: OK}}
+  /notifications/orders:
+    post:
+      summary: Webhook called by Kitchen Core on a new order
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [order_id, establishment_id]
+              properties:
+                order_id: {type: string, format: uuid}
+                establishment_id: {type: string, format: uuid}
+      responses: {'200': {description: Received or duplicate}}
+  /orders:
+    get:
+      summary: Incoming webhook notifications stored in memory
+      responses: {'200': {description: OK}}
+  /orders/{order_id}/decision:
+    post:
+      summary: Operator accepts or rejects an order through Core
+      parameters: [{name: order_id, in: path, required: true, schema: {type: string, format: uuid}}]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [accept]
+              properties:
+                accept: {type: boolean}
+                reason: {type: string}
+      responses: {'200': {description: Core response}, '409': {description: Invalid state}}
+  /orders/{order_id}/status:
+    post:
+      summary: Move an accepted order through the status state machine
+      parameters: [{name: order_id, in: path, required: true, schema: {type: string, format: uuid}}]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [status]
+              properties:
+                status: {type: string, enum: [preparing, ready, completed]}
+                comment: {type: string}
+      responses: {'200': {description: Core response}, '409': {description: Invalid state}}
+

@@ -1,0 +1,45 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: kitchen
+      POSTGRES_PASSWORD: kitchen
+      POSTGRES_DB: kitchen
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U kitchen -d kitchen"]
+      interval: 3s
+      timeout: 3s
+      retries: 10
+
+  kitchen-core:
+    build: ./kitchen-core
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      KITCHEN_DATABASE_URL: postgresql+psycopg2://kitchen:kitchen@postgres:5432/kitchen
+      KITCHEN_ADMIN_API_KEY: demo-admin-key
+    ports:
+      - "8000:8000"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 3s
+      timeout: 3s
+      retries: 10
+
+  establishment-service:
+    build: ./establishment-service
+    depends_on:
+      kitchen-core:
+        condition: service_healthy
+    environment:
+      CORE_BASE_URL: http://kitchen-core:8000
+      CORE_ADMIN_KEY: demo-admin-key
+      PARTNER_API_KEY: demo-mario-key
+    ports:
+      - "8001:8001"
+
+volumes:
+  pgdata:
