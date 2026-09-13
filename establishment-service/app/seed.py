@@ -9,6 +9,7 @@ import httpx
 CORE_BASE_URL = os.environ.get("CORE_BASE_URL", "http://kitchen-core:8000")
 SEED_FILE = "/app/establishment_id.json"
 PARTNER_ID = "mario-demo"
+PARTNER_API_KEY = os.environ.get("PARTNER_API_KEY", "demo-mario-partner-key-0001")
 
 
 def wait_for_core() -> None:
@@ -30,6 +31,7 @@ def main() -> None:
             "name": "Пиццерия Марио",
             "description": "Демонстрационное заведение для тестового задания",
             "callback_url": "http://establishment-service:8001",
+            "partner_api_key": PARTNER_API_KEY,
             "status": "open",
         },
         timeout=5.0,
@@ -76,4 +78,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-

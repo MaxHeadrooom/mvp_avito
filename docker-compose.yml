@@ -37,7 +37,7 @@ services:
     environment:
       CORE_BASE_URL: http://kitchen-core:8000
       CORE_ADMIN_KEY: demo-admin-key
-      PARTNER_API_KEY: demo-mario-key
+      PARTNER_API_KEY: demo-mario-partner-key-0001
     ports:
       - "8001:8001"
 

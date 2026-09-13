@@ -53,7 +53,11 @@ class Establishment(Base):
     description: Mapped[str | None] = mapped_column(Text, nullable=True)
     callback_url: Mapped[str] = mapped_column(String(500), nullable=False)
     status: Mapped[EstablishmentStatus] = mapped_column(
-        Enum(EstablishmentStatus, name="establishment_status"),
+        Enum(
+            EstablishmentStatus,
+            name="establishment_status",
+            values_callable=lambda enum_cls: [e.value for e in enum_cls],
+        ),
         default=EstablishmentStatus.OPEN,
         nullable=False,
     )
@@ -129,7 +133,13 @@ class Order(Base):
     comment: Mapped[str | None] = mapped_column(String(500), nullable=True)
     total_price: Mapped[Decimal] = mapped_column(Numeric(10, 2), nullable=False)
     status: Mapped[OrderStatus] = mapped_column(
-        Enum(OrderStatus, name="order_status"), default=OrderStatus.CREATED, nullable=False
+        Enum(
+            OrderStatus,
+            name="order_status",
+            values_callable=lambda enum_cls: [e.value for e in enum_cls],
+        ),
+        default=OrderStatus.CREATED,
+        nullable=False,
     )
     rejection_reason: Mapped[str | None] = mapped_column(String(500), nullable=True)
     created_at: Mapped[datetime] = mapped_column(
@@ -175,7 +185,12 @@ class OrderStatusHistory(Base):
         UUID(as_uuid=True), ForeignKey("orders.id", ondelete="CASCADE"), nullable=False
     )
     status: Mapped[OrderStatus] = mapped_column(
-        Enum(OrderStatus, name="order_status"), nullable=False
+        Enum(
+            OrderStatus,
+            name="order_status",
+            values_callable=lambda enum_cls: [e.value for e in enum_cls],
+        ),
+        nullable=False,
     )
     changed_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), default=utcnow, nullable=False

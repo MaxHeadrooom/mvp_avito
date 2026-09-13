@@ -76,6 +76,10 @@ curl -X POST http://localhost:8001/orders/<order_id>/decision \
   [CJM заведения](docs/cjm_establishment.puml), [схема БД](docs/db_schema.md) и
   [OpenAPI](docs/openapi.yaml).
 
+`.puml`-диаграммы можно просмотреть через расширение PlantUML в VS Code
+(Alt+D для превью) или вставив содержимое файла на
+<https://www.plantuml.com/plantuml/uml/>.
+
 Заказ принадлежит ровно одному заведению. `user_id` — идентификатор из
 внешнего сервиса аккаунтов; отдельную таблицу пользователей не создаём, потому
 что авторизация и аутентификация прямо исключены из задания. У заведения есть
@@ -102,9 +106,14 @@ Ruff также настроен для `establishment-service` в его `pypro
 
 ## Ограничения MVP
 
-- Нет аутентификации. В production клиентский `user_id` берётся из access token,
-  а partner API защищается service-to-service credentials и проверкой прав
-  конкретного заведения.
+- Нет аутентификации. В production клиентский `user_id` берётся из access token.
+  `partner_api_key` сохраняется в хешированном виде при регистрации заведения
+  (`PUT /establishments/{partner_id}`), но сверка ключа на последующих
+  partner-запросах (decision, status, product upsert) не реализована в рамках
+  MVP. В production нужна зависимость FastAPI, которая проверяет заголовок
+  вида `X-Partner-Api-Key` против сохранённого хеша для соответствующего
+  `establishment_id`, и аналогичная проверка `KITCHEN_ADMIN_API_KEY` для
+  самого эндпоинта регистрации.
 - Webhook доставляется best-effort. При недоступном партнёре заказ не теряется,
   но для гарантированной доставки в production нужен transactional outbox,
   очередь и повторы; партнёр также может забирать очередь через свой Core API.
@@ -115,4 +124,3 @@ Ruff также настроен для `establishment-service` в его `pypro
 
 План использования AI и принятые человеком архитектурные решения находятся в
 [docs/development-plan.md](docs/development-plan.md).
-

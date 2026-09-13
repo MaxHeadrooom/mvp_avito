@@ -7,6 +7,7 @@ from sqlalchemy.orm import Session
 
 from app import models, schemas
 from app.database import get_db
+from app.models import hash_api_key
 from app.services import order_service
 
 router = APIRouter(prefix="/establishments", tags=["establishments"])
@@ -26,6 +27,7 @@ def upsert_establishment(
     if establishment is None:
         establishment = models.Establishment(
             partner_id=partner_id,
+            partner_api_key_hash=hash_api_key(payload.partner_api_key),
             name=payload.name,
             description=payload.description,
             callback_url=str(payload.callback_url),
@@ -34,6 +36,7 @@ def upsert_establishment(
         db.add(establishment)
         response.status_code = status.HTTP_201_CREATED
     else:
+        establishment.partner_api_key_hash = hash_api_key(payload.partner_api_key)
         establishment.name = payload.name
         establishment.description = payload.description
         establishment.callback_url = str(payload.callback_url)
